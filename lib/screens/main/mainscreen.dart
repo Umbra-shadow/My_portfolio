@@ -65,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _navigateToResume() async {
-    final url = Uri.parse('assets/pdf/resume.pdf');
+    final url = Uri.parse('pdf/resume.pdf');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch resume';
     }
