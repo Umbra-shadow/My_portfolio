@@ -30,7 +30,7 @@ class IconsDesign extends StatelessWidget {
               elevation: 8,
               clipBehavior: Clip.antiAlias,
               child: Image.asset(
-                'images/$path',
+                'assets/images/$path',
                 fit: BoxFit.cover,
                 width: 150,
                 height: 150,

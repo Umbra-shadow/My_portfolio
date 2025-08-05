@@ -114,7 +114,7 @@ class _MobilescreenState extends State<Mobilescreen> {
     return Stack(
       children: [
         Image.asset(
-          'images/back.jpg',
+          'assets/images/back.jpg',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
