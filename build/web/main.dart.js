@@ -82164,7 +82164,7 @@ A.oM(s).ej()}},
 vN(){var s=0,r=A.P(t.H)
 var $async$vN=A.L(function(a,b){if(a===1)return A.M(b,r)
 while(true)switch(s){case 0:s=2
-return A.T(A.vq(A.fl("pdf/resume.pdf",0,null),B.Gv),$async$vN)
+return A.T(A.vq(A.fl("assets/assets/pdf/resume.pdf",0,null),B.Gv),$async$vN)
 case 2:if(!b)throw A.i("Could not launch resume")
 return A.N(null,r)}})
 return A.O($async$vN,r)},
