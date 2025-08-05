@@ -1,7 +1,6 @@
 import 'package:device_frame/device_frame.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // Assuming these are the paths to your screen widgets and other files
 import '../../umbra_utils/design/color.dart';
@@ -10,6 +9,7 @@ import '../sub/main/about.dart';
 import '../sub/main/contact.dart';
 import '../sub/main/experience.dart';
 import '../sub/main/home.dart';
+import '../sub/main/resume.dart';
 import '../sub/main/work.dart';
 
 // --- MAIN SCREEN WITH RESPONSIVE LOGIC ---
@@ -65,11 +65,15 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _navigateToResume() async {
-    final url = Uri.parse('assets/assets/pdf/resume.pdf');
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch resume';
-    }
-    ;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ResumeScreen()),
+    );
+    // final url = Uri.parse('assets/assets/pdf/resume.pdf');
+    // if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+    //   throw 'Could not launch resume';
+    // }
+    // ;
   }
 
   @override
