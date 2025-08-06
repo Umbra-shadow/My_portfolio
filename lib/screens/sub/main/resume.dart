@@ -234,7 +234,7 @@ class _ResumeSection extends StatelessWidget {
 class _ContactInfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Wrap(
+    return const Wrap(
       spacing: 12.0,
       runSpacing: 4.0,
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -243,17 +243,17 @@ class _ContactInfoBar extends StatelessWidget {
           label: "balingenensiidan@gmail.com",
           url: "mailto:balingenensiidan@gmail.com",
         ),
-        const Text("•", style: TextStyle(color: AppColors.textSecondaryWhite)),
+        Text("•", style: TextStyle(color: AppColors.textSecondaryWhite)),
         _ClickableContact(
           label: "Portfolio",
           url: "YOUR_PORTFOLIO_LINK_HERE",
         ), // Replace with your portfolio link
-        const Text("•", style: TextStyle(color: AppColors.textSecondaryWhite)),
+        Text("•", style: TextStyle(color: AppColors.textSecondaryWhite)),
         _ClickableContact(
           label: "LinkedIn",
           url: "https://www.linkedin.com/in/dan-balingene-802100326",
         ),
-        const Text("•", style: TextStyle(color: AppColors.textSecondaryWhite)),
+        Text("•", style: TextStyle(color: AppColors.textSecondaryWhite)),
         _ClickableContact(
           label: "GitHub",
           url: "https://github.com/Umbra-shadow",

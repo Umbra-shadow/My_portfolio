@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
 import '../../../umbra_utils/design/color.dart';
 
@@ -12,13 +13,11 @@ class SuggestionScreen extends StatefulWidget {
 }
 
 class _SuggestionScreenState extends State<SuggestionScreen> {
-  // State variables
-  int? _selectedIndex;
-  String? _selectedSkillName;
+  // State variables for multi-selection
+  final Map<String, Set<String>> _selectedSkills = {};
   final TextEditingController _reasonController = TextEditingController();
-  final TextEditingController _searchController = TextEditingController();
 
-  // Your skills data
+  // Your skills data remains the same
   final List<Map<String, dynamic>> _itSkillsWithRationales = const [
     {
       'category': 'Programming & Development',
@@ -128,48 +127,94 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
   @override
   void dispose() {
     _reasonController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
-  void _submitSuggestion() {
-    if (_selectedSkillName == null || _reasonController.text.isEmpty) {
+  void _toggleSkill(String category, String skill) {
+    setState(() {
+      // Ensure the category entry exists
+      _selectedSkills.putIfAbsent(category, () => <String>{});
+
+      // Add or remove the skill
+      if (_selectedSkills[category]!.contains(skill)) {
+        _selectedSkills[category]!.remove(skill);
+        // If the category becomes empty, remove it
+        if (_selectedSkills[category]!.isEmpty) {
+          _selectedSkills.remove(category);
+        }
+      } else {
+        _selectedSkills[category]!.add(skill);
+      }
+    });
+  }
+
+  Future<void> _submitSuggestion() async {
+    final hasSkills = _selectedSkills.values.any((skills) => skills.isNotEmpty);
+
+    if (!hasSkills || _reasonController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please select a skill and provide a reason."),
+          content: Text(
+            "Please select at least one skill and provide a reason.",
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Thanks for your suggestion: '$_selectedSkillName'!"),
-        backgroundColor: AppColors.portfolioPurple,
-      ),
+
+    // --- Construct the email body ---
+    final buffer = StringBuffer();
+    buffer.writeln("Hello,");
+    buffer.writeln("\nHere are some skill suggestions for your portfolio:");
+
+    _selectedSkills.forEach((category, skills) {
+      if (skills.isNotEmpty) {
+        buffer.writeln("\n-- $category --");
+        for (var skill in skills) {
+          buffer.writeln("- $skill");
+        }
+      }
+    });
+
+    buffer.writeln("\n-- Reason --");
+    buffer.writeln(_reasonController.text);
+    buffer.writeln("\nBest regards,");
+    buffer.writeln("A visitor of your portfolio");
+
+    // --- Create and launch the mailto URI ---
+    final Uri mailtoUri = Uri(
+      scheme: 'mailto',
+      path:
+          'your.email@example.com', // <-- IMPORTANT: CHANGE THIS TO YOUR EMAIL
+      query:
+          'subject=${Uri.encodeComponent('Skill Suggestion for Your Portfolio')}&body=${Uri.encodeComponent(buffer.toString())}',
     );
 
-    // Reset the form
-    _reasonController.clear();
-    _searchController.clear();
-    setState(() {
-      _selectedSkillName = null;
-      _selectedIndex = null;
-    });
+    if (await canLaunchUrl(mailtoUri)) {
+      await launchUrl(mailtoUri);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Could not launch email app. Please send your suggestion manually.",
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool hasSelections = _selectedSkills.values.any((s) => s.isNotEmpty);
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Padding(
-          padding: const EdgeInsets.only(
-            top: 30.0,
-            bottom: 08.0,
-            left: 08.0,
-            right: 08.0,
-          ),
+          padding: const EdgeInsets.only(top: 30.0, left: 8.0, right: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -178,104 +223,91 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                 "Suggest a Skill",
                 style: GoogleFonts.poppins(
                   fontSize: 28,
-                  color: AppColors.textPrimaryWhite,
+                  color: AppColors.textPrimaryBlack,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                "Help me grow by suggesting a skill you think is important.",
+                "Help me grow by suggesting skills you think are important. You can select multiple!",
                 style: GoogleFonts.poppins(
-                  color: AppColors.textSecondaryWhite,
+                  color: AppColors.textSecondaryBlack,
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: 30),
 
-              // --- CATEGORY SELECTION ---
+              // --- YOUR SELECTIONS SUMMARY ---
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SizeTransition(sizeFactor: animation, child: child),
+                ),
+                child: hasSelections
+                    ? _SelectedSkillsSummary(
+                        selectedSkills: _selectedSkills,
+                        onSkillRemoved: _toggleSkill,
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
+              // --- SKILL CATEGORIES & SKILLS LIST ---
               Text(
-                "1. Select a Category",
+                "1. Select Skills by Category",
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryWhite,
+                  color: AppColors.textPrimaryBlack,
                 ),
               ),
               const SizedBox(height: 15),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: List.generate(_itSkillsWithRationales.length, (
-                  index,
-                ) {
-                  return _SkillCategoryCard(
-                    category: _itSkillsWithRationales[index]['category'],
-                    icon: _itSkillsWithRationales[index]['icon'],
-                    isSelected: _selectedIndex == index,
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = index;
-                        _selectedSkillName = null; // Clear previous skill
-                        _searchController.clear(); // Clear search field
-                      });
-                    },
+              ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: _itSkillsWithRationales.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 20),
+                itemBuilder: (context, index) {
+                  final categoryData = _itSkillsWithRationales[index];
+                  final categoryName = categoryData['category'] as String;
+                  final skills = categoryData['skills'] as List<String>;
+                  final icon = categoryData['icon'] as IconData;
+                  final selectedSkillsForCategory =
+                      _selectedSkills[categoryName] ?? <String>{};
+
+                  return _SkillExpansionTile(
+                    category: categoryName,
+                    icon: icon,
+                    skills: skills,
+                    selectedSkillsForCategory: selectedSkillsForCategory,
+                    onSkillToggled: (skill) =>
+                        _toggleSkill(categoryName, skill),
                   );
-                }),
+                },
               ),
               const SizedBox(height: 40),
 
-              // --- SKILL SELECTION (ANIMATED & IN-PAGE) ---
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SizeTransition(
-                      sizeFactor: animation,
-                      axisAlignment: -1.0,
-                      child: child,
-                    ),
-                  );
-                },
-                child: _selectedIndex == null
-                    ? const SizedBox.shrink() // Show nothing if no category is selected
-                    : _SkillSelector(
-                        key: ValueKey(
-                          _selectedIndex,
-                        ), // Important for rebuilding with new skills
-                        skills: List<String>.from(
-                          _itSkillsWithRationales[_selectedIndex!]['skills'],
-                        ),
-                        searchController: _searchController,
-                        selectedSkillName: _selectedSkillName,
-                        onSkillSelected: (skill) {
-                          setState(() {
-                            _selectedSkillName = skill;
-                          });
-                        },
-                      ),
-              ),
-
               // --- REASON & SUBMIT ---
               Text(
-                "3. Why is this skill important?",
+                "2. Why are these skills important?",
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryWhite,
+                  color: AppColors.textPrimaryBlack,
                 ),
               ),
               const SizedBox(height: 15),
               TextField(
                 controller: _reasonController,
                 maxLines: 4,
-                style: GoogleFonts.poppins(color: AppColors.textPrimaryWhite),
+                style: GoogleFonts.poppins(color: AppColors.textPrimaryBlack),
                 decoration: InputDecoration(
-                  labelText: 'Your reasoning...',
-                  border: OutlineInputBorder(),
-                  labelStyle: GoogleFonts.poppins(
+                  hintText: 'Your reasoning...',
+                  border: const OutlineInputBorder(),
+                  hintStyle: GoogleFonts.poppins(
                     fontSize: 16,
-                    color: AppColors.textSecondaryWhite,
+                    color: AppColors.textSecondaryBlack.withOpacity(0.6),
                   ),
                 ),
               ),
@@ -295,7 +327,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: const Text("Submit Suggestion"),
+                  child: const Text("Submit Suggestion via Email"),
                 ),
               ),
             ],
@@ -306,168 +338,157 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
   }
 }
 
-class _SkillCategoryCard extends StatelessWidget {
-  final String category;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
+// --- NEW & REFACTORED WIDGETS ---
 
-  const _SkillCategoryCard({
-    required this.category,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
+class _SelectedSkillsSummary extends StatelessWidget {
+  final Map<String, Set<String>> selectedSkills;
+  final Function(String category, String skill) onSkillRemoved;
+
+  const _SelectedSkillsSummary({
+    required this.selectedSkills,
+    required this.onSkillRemoved,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 150,
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.portfolioPurple.withOpacity(0.1)
-              : AppColors.cardMuted,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.portfolioPurple : AppColors.cardMuted,
-            width: 2,
+    return Container(
+      key: const ValueKey('summary'),
+      margin: const EdgeInsets.only(bottom: 40),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.portfolioPurple.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Your Selections",
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimaryBlack,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 36,
-              color: isSelected
-                  ? AppColors.portfolioPurple
-                  : AppColors.textSecondaryBlack,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              category,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? AppColors.portfolioPurple
-                    : AppColors.textPrimaryBlack,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+          const SizedBox(height: 15),
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: selectedSkills.entries.expand((entry) {
+              final category = entry.key;
+              final skills = entry.value;
+              return skills.map((skill) {
+                return Chip(
+                  label: Text(
+                    skill,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  backgroundColor: AppColors.portfolioPurple,
+                  onDeleted: () => onSkillRemoved(category, skill),
+                  deleteIcon: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                );
+              });
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _SkillSelector extends StatefulWidget {
+class _SkillExpansionTile extends StatelessWidget {
+  final String category;
+  final IconData icon;
   final List<String> skills;
-  final TextEditingController searchController;
-  final String? selectedSkillName;
-  final ValueChanged<String> onSkillSelected;
+  final Set<String> selectedSkillsForCategory;
+  final ValueChanged<String> onSkillToggled;
 
-  const _SkillSelector({
-    super.key,
+  const _SkillExpansionTile({
+    required this.category,
+    required this.icon,
     required this.skills,
-    required this.searchController,
-    this.selectedSkillName,
-    required this.onSkillSelected,
+    required this.selectedSkillsForCategory,
+    required this.onSkillToggled,
   });
 
   @override
-  State<_SkillSelector> createState() => _SkillSelectorState();
-}
-
-class _SkillSelectorState extends State<_SkillSelector> {
-  @override
   Widget build(BuildContext context) {
-    final filteredSkills = widget.skills
-        .where(
-          (skill) => skill.toLowerCase().contains(
-            widget.searchController.text.toLowerCase(),
-          ),
-        )
-        .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "2. Select a Skill",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimaryWhite,
-          ),
-        ),
-        const SizedBox(height: 15),
-        // Display the selected skill
-        if (widget.selectedSkillName != null)
-          Chip(
-            label: Text(
-              widget.selectedSkillName!,
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          collapsedBackgroundColor: AppColors.cardMuted.withOpacity(0.5),
+          backgroundColor: AppColors.cardMuted.withOpacity(0.7),
+          leading: Icon(icon, color: AppColors.textPrimaryBlack),
+          title: Text(
+            category,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimaryBlack,
             ),
-            backgroundColor: AppColors.portfolioPurple,
-            onDeleted: () {
-              widget.onSkillSelected(''); // Clear the skill
-            },
-            deleteIcon: const Icon(Icons.close, color: Colors.white, size: 18),
-          )
-        else
-          Column(
-            children: [
-              TextField(
-                controller: widget.searchController,
-                onChanged: (value) => setState(() {}),
-                decoration: InputDecoration(
-                  labelText: 'Search for a skill...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: const OutlineInputBorder(),
-                  labelStyle: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: AppColors.textSecondaryWhite,
+          ),
+          trailing: selectedSkillsForCategory.isEmpty
+              ? const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppColors.textSecondaryBlack,
+                )
+              : CircleAvatar(
+                  radius: 12,
+                  backgroundColor: AppColors.portfolioPurple,
+                  child: Text(
+                    selectedSkillsForCategory.length.toString(),
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.cardMuted),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: filteredSkills.length,
-                  itemBuilder: (context, index) {
-                    final skill = filteredSkills[index];
-                    return ListTile(
-                      title: Text(
-                        skill,
-                        style: GoogleFonts.poppins(
-                          color: AppColors.textPrimaryWhite,
-                        ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: skills.map((skill) {
+                  final isSelected = selectedSkillsForCategory.contains(skill);
+                  return FilterChip(
+                    label: Text(
+                      skill,
+                      style: GoogleFonts.poppins(
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textPrimaryBlack,
                       ),
-                      onTap: () => widget.onSkillSelected(skill),
-                    );
-                  },
-                ),
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) => onSkillToggled(skill),
+                    selectedColor: AppColors.portfolioPurple,
+                    checkmarkColor: Colors.white,
+                    backgroundColor: AppColors.cardMuted.withOpacity(0.8),
+                    shape: StadiumBorder(
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppColors.portfolioPurple
+                            : AppColors.cardMuted,
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
-            ],
-          ),
-        const SizedBox(height: 40),
-      ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

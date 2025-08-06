@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myportfolio/screens/main/mainscreen.dart';
 
+import '../../../pText.dart';
 import '../../../umbra_utils/design/color.dart';
-import '../../../umbra_utils/reusable/pText.dart';
 import '../../main/mobilescreen.dart';
 
 class HomeContent extends StatelessWidget {
@@ -207,11 +207,32 @@ class HomeContent extends StatelessWidget {
                           text: 'Exit Portfolio',
                           ctaBackground: Colors.white,
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Mobilescreen(),
-                              ),
+                            _showAlertDialog(
+                              context: context,
+                              title: 'Exit Portfolio',
+                              content:
+                                  'Are you sure you want to exit? Behind this,is another world,far from this one(check it out).',
+                              actions: [
+                                _alertDialogAction(
+                                  text: 'Yes',
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Mobilescreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                _alertDialogAction(
+                                  text: 'No',
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
                             );
                           },
                           fontsize: 20,
@@ -241,6 +262,49 @@ class HomeContent extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _showAlertDialog({
+    required BuildContext context,
+    required String title,
+    required String content,
+    required List<Widget> actions,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            title,
+            style: GoogleFonts.poppins(
+              color: AppColors.textPrimaryBlack,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: SizedBox(
+            width: 50,
+            height: 60,
+            child: Text(
+              content,
+              style: GoogleFonts.poppins(color: AppColors.textSecondaryBlack),
+            ),
+          ),
+          actions: actions,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: const BorderSide(color: AppColors.portfolioPurple, width: 1),
+          ),
+        );
+      },
+    );
+  }
+
+  _alertDialogAction({
+    required String text,
+    required Null Function() onPressed,
+  }) {
+    return TextButton(onPressed: onPressed, child: Text(text));
   }
 }
 

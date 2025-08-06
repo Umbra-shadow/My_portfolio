@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../pText.dart';
 import '../../../umbra_utils/design/color.dart';
-import '../../../umbra_utils/reusable/pText.dart';
 
 class ContactScreen extends StatelessWidget {
   final bool isTablet;

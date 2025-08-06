@@ -56,6 +56,7 @@ class _PoemScreenState extends State<PoemScreen> {
     final AppPoems currentPoem = poems[_currentIndex];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -88,7 +89,7 @@ class _PoemScreenState extends State<PoemScreen> {
                     style: GoogleFonts.breeSerif(
                       fontSize: 20,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondaryWhite,
+                      color: AppColors.textSecondaryBlack,
                       height: 1.8,
                     ),
                   ),
@@ -101,7 +102,7 @@ class _PoemScreenState extends State<PoemScreen> {
                   '~~ Balingene Dan ~~',
                   style: GoogleFonts.pacifico(
                     fontSize: 18,
-                    color: AppColors.textSecondaryWhite,
+                    color: AppColors.textSecondaryBlack,
                   ),
                 ),
               ],
@@ -157,7 +158,7 @@ class _PoemHeader extends StatelessWidget {
       style: GoogleFonts.poppins(
         fontSize: 30,
         fontWeight: FontWeight.bold,
-        color: AppColors.textPrimaryWhite,
+        color: AppColors.textPrimaryBlack,
       ),
     );
   }
@@ -172,13 +173,13 @@ class _PoemHeader extends StatelessWidget {
             onPressed: onShuffle,
             icon: const Icon(
               CupertinoIcons.shuffle,
-              color: AppColors.textSecondaryWhite,
+              color: AppColors.textSecondaryBlack,
             ),
           ),
         ),
         const SizedBox(width: 10),
         Tooltip(
-          message: "Play inspired song on YouTube",
+          message: "Play inspired song on Spotify",
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.dashboardGreen,
@@ -189,12 +190,12 @@ class _PoemHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             onPressed: onPlayMusic,
-            icon: const Icon(Icons.music_note, size: 18),
+            icon: const Icon(Icons.music_note, size: 18, color: Colors.white),
             label: Text(
               'Play Song',
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimaryWhite,
+                color: Colors.white,
               ),
             ),
           ),
@@ -222,7 +223,7 @@ class _LinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.textSecondaryWhite.withOpacity(0.3)
+      ..color = AppColors.textSecondaryBlack.withOpacity(0.3)
       ..strokeWidth = 1.0;
 
     // Draw a simple line with dots at the end

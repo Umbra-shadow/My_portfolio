@@ -5,9 +5,11 @@ import 'package:myportfolio/screens/sub/sub/chat.dart';
 import 'package:myportfolio/screens/sub/sub/poem.dart';
 import 'package:myportfolio/screens/sub/sub/suggestion.dart';
 
-import '../../umbra_utils/reusable/icons.dart'; // Ensure this path is correct
+import '../../icons.dart';
+import '../../image.dart';
 import 'mainscreen.dart';
 
+// Your AppDetails class remains the same...
 class AppDetails {
   final String image;
   final String name;
@@ -29,10 +31,11 @@ class Mobilescreen extends StatefulWidget {
   State<Mobilescreen> createState() => _MobilescreenState();
 }
 
+// --- CHANGE: The State class is now much simpler ---
+// No more TickerProviderStateMixin or animation controllers here.
 class _MobilescreenState extends State<Mobilescreen> {
   int? _selectedScreenIndex;
 
-  // Updated list with the 'isPortfolio' flag
   final List<AppDetails> _apps = [
     AppDetails(
       image: 'portfolio.png',
@@ -71,14 +74,20 @@ class _MobilescreenState extends State<Mobilescreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: DeviceFrame(
-              device: Devices.ios.iPad,
-              screen: _buildScreenContent(),
+      backgroundColor: Colors.black,
+      // --- CHANGE: The entire body is now our new interactive widget ---
+      body: InteractiveSpotlightBackground(
+        // Use a different, high-res image for the main page background
+        imagePath: 'assets/images/bachira.png',
+        // The child is the content that sits ON TOP of the background
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: DeviceFrame(
+                device: Devices.ios.iPad,
+                screen: _buildScreenContent(),
+              ),
             ),
           ),
         ),
@@ -88,7 +97,7 @@ class _MobilescreenState extends State<Mobilescreen> {
 
   Widget _buildScreenContent() {
     if (_selectedScreenIndex == null) {
-      return _buildHomeScreen();
+      return _buildAnimatedHomeScreen();
     } else {
       return Stack(
         fit: StackFit.expand,
@@ -110,34 +119,31 @@ class _MobilescreenState extends State<Mobilescreen> {
     }
   }
 
-  Widget _buildHomeScreen() {
-    return Stack(
-      children: [
-        Image.asset(
-          'assets/images/back.jpg',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-        ),
-        Center(
-          child: Container(
-            alignment: Alignment.center,
-            height: 220,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              shrinkWrap: true,
-              itemCount: _apps.length,
-              itemBuilder: (context, index) {
-                return IconsDesign(
-                  path: _apps[index].image,
-                  name: _apps[index].name,
-                  onTap: () => _selectScreen(index),
-                );
-              },
-            ),
+  Widget _buildAnimatedHomeScreen() {
+    // --- CHANGE: This now also uses the reusable widget for the device screen ---
+    return InteractiveSpotlightBackground(
+      // This is the background for INSIDE the iPad
+      imagePath: 'assets/images/back.jpg',
+      child: Center(
+        child: Container(
+          alignment: Alignment.center,
+          height: 220,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            itemCount: _apps.length,
+            itemBuilder: (context, index) {
+              return IconsDesign(
+                path: _apps[index].image,
+                name: _apps[index].name,
+                onTap: () => _selectScreen(index),
+              );
+            },
           ),
         ),
-      ],
+      ),
     );
   }
 }
+
+// Paste the InteractiveSpotlightBackground widget class here or import it.

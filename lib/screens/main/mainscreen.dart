@@ -2,9 +2,9 @@ import 'package:device_frame/device_frame.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../pText.dart';
 // Assuming these are the paths to your screen widgets and other files
 import '../../umbra_utils/design/color.dart';
-import '../../umbra_utils/reusable/pText.dart';
 import '../sub/main/about.dart';
 import '../sub/main/contact.dart';
 import '../sub/main/experience.dart';

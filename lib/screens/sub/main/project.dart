@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../pText.dart'; // Assuming PText is in this path
 import '../../../umbra_utils/design/color.dart';
-import '../../../umbra_utils/reusable/pText.dart'; // Assuming PText is in this path
 
 class ProjectsContent extends StatelessWidget {
   final bool isTablet;

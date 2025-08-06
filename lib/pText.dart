@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../design/color.dart';
+import 'umbra_utils/design/color.dart';
 
 class NavButton extends StatelessWidget {
   final String text;

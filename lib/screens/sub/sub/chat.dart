@@ -1,16 +1,10 @@
-import 'dart:async';
-
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:string_similarity/string_similarity.dart';
 
 import '../../../umbra_utils/design/color.dart';
-
-class ChatMessage {
-  final String text;
-  final bool isUserMessage;
-  const ChatMessage({required this.text, required this.isUserMessage});
-}
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -22,17 +16,192 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final List<ChatMessage> _messages = [];
-  bool _isAiTyping = false;
+  List<List<dynamic>> _csvData = [];
+  List<String> _suggestedQuestions = [];
 
   @override
   void initState() {
     super.initState();
-    // Start with a welcoming message from the AI
+    // Add an initial greeting message from the AI to guide the user.
     _messages.add(
       const ChatMessage(
         text:
-            "Hello! I am a trained AI version of Dan. How can I help you today?",
+            "Hello! I'm Dan's AI assistant. Start typing a question and select one of the suggestions that appear. It might not be much accurate but if your question is clear you will get an answer.",
         isUserMessage: false,
+      ),
+    );
+    _loadCSV();
+    _textController.addListener(_onTextChanged);
+  }
+
+  Future<void> _loadCSV() async {
+    // Ensure you have your CSV file in the assets folder
+    // and that it's declared in pubspec.yaml
+    try {
+      final rawData = await rootBundle.loadString('assets/qa_data.csv');
+      _csvData = const CsvToListConverter().convert(rawData);
+      setState(() {});
+    } catch (e) {
+      // Handle potential errors, e.g., file not found
+      _messages.insert(
+        0,
+        const ChatMessage(
+          text:
+              "⚠️ Error: Could not load portfolio data. Please ensure the CSV file is correctly placed in the assets folder.",
+          isUserMessage: false,
+        ),
+      );
+    }
+  }
+
+  void _onTextChanged() {
+    final query = _textController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      setState(() {
+        _suggestedQuestions = [];
+      });
+      return;
+    }
+
+    final questions = _csvData.map((row) => row[0].toString()).toList();
+    final bestMatches = StringSimilarity.findBestMatch(query, questions);
+
+    // --- IMPROVEMENT: Stricter similarity threshold ---
+    // Increased threshold from 0.1 to 0.35 to filter out irrelevant matches.
+    // This ensures that only meaningfully similar questions are suggested.
+    setState(() {
+      _suggestedQuestions = bestMatches.ratings
+          .where((rating) => rating.rating != null && rating.rating! > 0.35)
+          .take(2)
+          .map((rating) => rating.target!)
+          .toList();
+    });
+  }
+
+  void _onQuestionSelected(String question) {
+    // Find the corresponding answer from the CSV data.
+    final answerRow = _csvData.firstWhere(
+      (row) => row[0].toString() == question,
+      orElse: () => [
+        "Question not found",
+        "Sorry, I couldn't find an answer for that.",
+      ],
+    );
+    final answer = answerRow[1].toString();
+
+    setState(() {
+      // Add the user's selected question and the AI's answer to the chat.
+      _messages.insert(0, ChatMessage(text: question, isUserMessage: true));
+      _messages.insert(0, ChatMessage(text: answer, isUserMessage: false));
+      // Clear suggestions and the text field.
+      _suggestedQuestions = [];
+      _textController.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          "Umbrio Chat",
+          style: GoogleFonts.poppins(color: AppColors.textPrimaryWhite),
+        ),
+        backgroundColor: AppColors.backgroundBlack,
+        foregroundColor: AppColors.portfolioPurple,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              reverse: true,
+              itemCount: _messages.length,
+              itemBuilder: (context, index) => _messages[index],
+            ),
+          ),
+          const Divider(height: 1.0, color: Colors.black),
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Only show the "Did you mean:" prompt if there are suggestions.
+                if (_suggestedQuestions.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: Text(
+                      "Did you mean:",
+                      style: GoogleFonts.poppins(
+                        color: AppColors.textPrimaryBlack,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                // Build the list of tappable suggestions.
+                ..._suggestedQuestions.map((question) {
+                  return ListTile(
+                    title: Text(
+                      question,
+                      // Text color is white for visibility.
+                      style: GoogleFonts.poppins(
+                        color: AppColors.textPrimaryBlack,
+                      ),
+                    ),
+                    onTap: () => _onQuestionSelected(question),
+                  );
+                }).toList(),
+                _buildTextComposer(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextComposer() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.portfolioPurple, width: 2.0),
+      ),
+      child: Center(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+
+          children: [
+            Expanded(
+              child: Container(
+                height: 60,
+                child: TextField(
+                  controller: _textController,
+                  textAlign: TextAlign.start,
+                  textAlignVertical: TextAlignVertical.center,
+                  style: GoogleFonts.poppins(
+                    color: AppColors.textPrimaryBlack,
+                    fontSize: 20,
+                  ), // User input text is white.
+                  decoration: InputDecoration.collapsed(
+                    hintText: 'Ask a question...',
+                    hintStyle: GoogleFonts.poppins(
+                      color: AppColors.portfolioPurple,
+                      fontSize: 20,
+                    ), // Hint text is grey.
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              // Icon is white to be visible.
+              icon: const Icon(Icons.search, color: AppColors.textPrimaryBlack),
+              onPressed: () => _onTextChanged(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -42,217 +211,76 @@ class _ChatScreenState extends State<ChatScreen> {
     _textController.dispose();
     super.dispose();
   }
+}
 
-  void _sendMessage() {
-    final text = _textController.text;
-    if (text.trim().isEmpty) return;
+// The ChatMessage widget remains the same but will function well
+// with the dark theme because its colors are self-contained.
+class ChatMessage extends StatelessWidget {
+  final String text;
+  final bool isUserMessage;
 
-    // Add user's message to the list
-    setState(() {
-      _messages.insert(0, ChatMessage(text: text, isUserMessage: true));
-      _isAiTyping = true;
-    });
-    _textController.clear();
-
-    // --- Backend Simulation ---
-    // Simulate a delay, then add the AI's response.
-    // In a real app, you would make your API call here.
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      const aiResponse = ChatMessage(
-        text:
-            "That's a great question! While I process that, feel free to ask me about Dan's skills in Flutter, Python, or Cloud technologies.",
-        isUserMessage: false,
-      );
-      setState(() {
-        _isAiTyping = false;
-        _messages.insert(0, aiResponse);
-      });
-    });
-  }
+  const ChatMessage({
+    super.key,
+    required this.text,
+    required this.isUserMessage,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 1,
-        title: Text(
-          "AI Assistant",
-          style: GoogleFonts.poppins(
-            color: AppColors.textPrimaryWhite,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          // --- CHAT MESSAGE LIST ---
-          Expanded(
-            child: ListView.builder(
-              reverse: true, // Makes the list grow from the bottom
-              padding: const EdgeInsets.all(16.0),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                return _ChatMessageBubble(message: _messages[index]);
-              },
-            ),
-          ),
-
-          // --- "AI IS TYPING" INDICATOR ---
-          if (_isAiTyping) const _AiTypingIndicator(),
-
-          // --- TEXT INPUT AREA ---
-          _buildTextInputArea(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextInputArea() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        color: isUserMessage
+            ? AppColors.portfolioPurple.withOpacity(0.1)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(25.0),
+        border: Border.all(color: AppColors.portfolioPurple, width: 2.0),
       ),
-      child: SafeArea(
+      padding: const EdgeInsets.all(12.0),
+      child: Center(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: isUserMessage
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
           children: [
-            Expanded(
-              child: TextField(
-                controller: _textController,
-                onSubmitted: (_) => _sendMessage(),
-                decoration: InputDecoration(
-                  hintText: "Ask about skills, projects...",
-                  // filled: true,
-                  // fillColor: AppColors.cardBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
+            if (!isUserMessage)
+              Center(
+                child: CircleAvatar(
+                  backgroundColor: AppColors.portfolioPurple.withOpacity(0.1),
+                  child: const Text('🤖'),
+                ),
+              ),
+            if (!isUserMessage) const SizedBox(width: 8.0),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: isUserMessage ? Colors.transparent : Colors.white,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Text(
+                  text,
+                  style: GoogleFonts.poppins(
+                    color: isUserMessage
+                        ? AppColors.textPrimaryBlack
+                        : AppColors.portfolioPurple,
+                    fontSize: 20,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.send_rounded),
-              onPressed: _sendMessage,
-              color: AppColors.portfolioPurple,
-              iconSize: 28,
-            ),
+            if (isUserMessage) const SizedBox(width: 8.0),
+            if (isUserMessage)
+              Center(
+                child: CircleAvatar(
+                  backgroundColor: AppColors.portfolioPurple.withOpacity(0.1),
+                  child: const Text('👤'),
+                ),
+              ),
           ],
         ),
       ),
     );
-  }
-}
-
-// --- REUSABLE SUB-WIDGETS ---
-
-class _ChatMessageBubble extends StatelessWidget {
-  final ChatMessage message;
-  const _ChatMessageBubble({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isUser = message.isUserMessage;
-    return Align(
-          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 5.0),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 10.0,
-            ),
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.7,
-            ),
-            decoration: BoxDecoration(
-              color: isUser ? AppColors.portfolioPurple : AppColors.cardMuted,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(20),
-                topRight: const Radius.circular(20),
-                bottomLeft: isUser ? const Radius.circular(20) : Radius.zero,
-                bottomRight: isUser ? Radius.zero : const Radius.circular(20),
-              ),
-            ),
-            child: Text(
-              message.text,
-              style: TextStyle(
-                color: isUser
-                    ? AppColors.textPrimaryBlack
-                    : AppColors.textPrimaryBlack,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        )
-        .animate()
-        .fadeIn(duration: 400.ms)
-        .slideY(begin: 0.2, duration: 300.ms, curve: Curves.easeOut);
-  }
-}
-
-class _AiTypingIndicator extends StatelessWidget {
-  const _AiTypingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 10.0,
-            ),
-            decoration: const BoxDecoration(
-              color: AppColors.cardMuted,
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _TypingDot(),
-                _TypingDot(delay: 200.ms),
-                _TypingDot(delay: 400.ms),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TypingDot extends StatelessWidget {
-  final Duration delay;
-  const _TypingDot({this.delay = Duration.zero});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-          width: 8,
-          height: 8,
-          margin: const EdgeInsets.symmetric(horizontal: 2),
-          decoration: const BoxDecoration(
-            color: AppColors.textPrimaryWhite,
-            shape: BoxShape.circle,
-          ),
-        )
-        .animate(
-          onPlay: (controller) => controller.repeat(reverse: true),
-          delay: delay,
-        )
-        .moveY(begin: -2, end: 2, duration: 600.ms, curve: Curves.easeInOut);
   }
 }
