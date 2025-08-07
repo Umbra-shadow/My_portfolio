@@ -39,31 +39,19 @@
       position: relative;
     }
 
-    /* --- NEW: Floating Emoji Style --- */
-    .floating-emoji {
-      font-size: 6rem; /* Made the emoji much bigger */
-      opacity: 0;
-      position: absolute;
-      width: 100%;
-      left: 0;
-      top: -120px; /* Position it above the text */
-      animation: float 4s ease-in-out infinite, emojiFadeIn 1.5s ease-out forwards;
-      text-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
-    }
-
     .welcome-text {
       color: #FFFFFF;
       font-size: 2.5rem;
       font-weight: 500;
       opacity: 0;
-      /* SLOWER: Increased duration from 1.8s to 4s */
-      animation: fadeInOut 4s ease-in-out forwards;
+      /* Reduced animation duration for a quicker welcome message */
+      animation: fadeInOut 1.5s ease-in-out forwards;
     }
 
     .portfolio-details {
       opacity: 0;
-      /* SLOWER: Increased delay to wait for the welcome text */
-      animation: fadeIn 2s ease-out 3.8s forwards;
+      /* Reduced delay so it appears sooner after the welcome text */
+      animation: fadeIn 1s ease-out 1.2s forwards;
     }
 
     .loading-container {
@@ -78,8 +66,8 @@
       font-size: 3.5rem;
       font-weight: 700;
       transform: translateY(100%);
-      /* SLOWER: Increased duration and delay */
-      animation: revealText 1.5s cubic-bezier(0.77, 0, 0.175, 1) 4s forwards;
+      /* Reduced delay for the main text reveal */
+      animation: revealText 1s cubic-bezier(0.77, 0, 0.175, 1) 1.5s forwards;
       text-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
     }
 
@@ -87,8 +75,8 @@
       color: #B0B0B0;
       font-size: 1.5rem;
       font-weight: 400;
-      /* SLOWER: Increased duration and delay */
-      animation: revealText 1.5s cubic-bezier(0.77, 0, 0.175, 1) 4.2s forwards;
+      /* Reduced delay for the subtitle reveal */
+      animation: revealText 1s cubic-bezier(0.77, 0, 0.175, 1) 1.7s forwards;
     }
 
     .loading-container::after {
@@ -101,47 +89,28 @@
       background-color: #8B5CF6;
       transform: scaleX(0);
       transform-origin: left;
-      /* SLOWER: Increased duration and delay to match loading-text */
-      animation: revealMask 1.5s cubic-bezier(0.77, 0, 0.175, 1) 4s forwards;
+      /* Reduced delay for the main text mask */
+      animation: revealMask 1s cubic-bezier(0.77, 0, 0.175, 1) 1.5s forwards;
     }
 
     .subtitle-container::after {
-        /* SLOWER: Increased duration and delay to match subtitle */
-      animation: revealMask 1.5s cubic-bezier(0.77, 0, 0.175, 1) 4.2s forwards;
+      /* Reduced delay for the subtitle mask */
+      animation: revealMask 1s cubic-bezier(0.77, 0, 0.175, 1) 1.7s forwards;
     }
 
-
-    /* --- KEYFRAME ANIMATIONS --- */
-
-    /* NEW: Keyframe for the floating emoji */
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-20px);
-      }
-    }
-
-    /* NEW: Keyframe for the emoji to fade in gently */
-    @keyframes emojiFadeIn {
-        to {
-            opacity: 1;
-        }
-    }
-
-
+    /* Keyframe durations remain the same for a quick, impactful animation */
     @keyframes fadeInOut {
       0% {
         opacity: 0;
         transform: scale(0.9);
       }
-      /* Held for longer to be more readable */
-      25%,
-      75% {
+
+      20%,
+      80% {
         opacity: 1;
         transform: scale(1);
       }
+
       100% {
         opacity: 0;
         transform: scale(0.9);
@@ -165,14 +134,17 @@
         transform: scaleX(0);
         transform-origin: left;
       }
+
       50% {
         transform: scaleX(1);
         transform-origin: left;
       }
+
       51% {
         transform: scaleX(1);
         transform-origin: right;
       }
+
       100% {
         transform: scaleX(0);
         transform-origin: right;
@@ -184,9 +156,6 @@
 <body>
 
 <div class="loading-wrapper">
-  <!-- NEW: Added the moving emoji element -->
-  <div class="floating-emoji">👋</div>
-
   <div class="welcome-text">Welcome</div>
 
   <div class="portfolio-details">
@@ -198,7 +167,6 @@
     </div>
   </div>
 </div>
-
 <script src="flutter_bootstrap.js" async></script>
 </body>
 
