@@ -1,80 +1,169 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="This is my personal portfolio from scratch to end">
+  <meta name="description" content="My portfolio Umbrio - A personal portfolio from scratch to end.">
 
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="myportfolio">
+  <meta name="apple-mobile-web-app-title" content="My portfolio Umbrio">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>myportfolio</title>
+  <title>My portfolio Umbrio</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- START: Splash Screen CSS -->
   <style>
     body {
       background-color: #121212;
-    }
-
-    .loading {
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
       margin: 0;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .loading-wrapper {
+      text-align: center;
+      position: relative;
+      /* Added for positioning the content */
+    }
+
+    .welcome-text {
+      color: #FFFFFF;
+      font-size: 2.5rem;
+      font-weight: 500;
+      opacity: 0;
+      animation: fadeInOut 2.5s ease-in-out forwards;
+    }
+
+    .portfolio-details {
+      opacity: 0;
+      animation: fadeIn 1s ease-out 2s forwards;
+    }
+
+    .loading-container {
+      display: block;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .loading-text {
+      color: #FFFFFF;
+      font-size: 3.5rem;
+      font-weight: 700;
+      transform: translateY(100%);
+      animation: revealText 1s cubic-bezier(0.77, 0, 0.175, 1) 2.5s forwards;
+      text-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+      /* Added a subtle purple glow */
+    }
+
+    .subtitle {
+      color: #B0B0B0;
+      font-size: 1.5rem;
+      font-weight: 400;
+      animation: revealText 1s cubic-bezier(0.77, 0, 0.175, 1) 2.7s forwards;
+    }
+
+    .loading-container::after {
+      content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #8B5CF6;
+      /* A more vibrant purple */
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: revealMask 1s cubic-bezier(0.77, 0, 0.175, 1) 2.5s forwards;
     }
 
-    .loader {
-      border: 5px solid #7869E9; /* A purple accent color */
-      border-top-color: #7869E9;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
+    .subtitle-container::after {
+      animation: revealMask 1s cubic-bezier(0.77, 0, 0.175, 1) 2.7s forwards;
     }
 
-    @keyframes spin {
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      20%,
+      80% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+
+    @keyframes fadeIn {
       to {
-        transform: rotate(360deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes revealText {
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes revealMask {
+      0% {
+        transform: scaleX(0);
+        transform-origin: left;
+      }
+
+      50% {
+        transform: scaleX(1);
+        transform-origin: left;
+      }
+
+      51% {
+        transform: scaleX(1);
+        transform-origin: right;
+      }
+
+      100% {
+        transform: scaleX(0);
+        transform-origin: right;
       }
     }
   </style>
-  <!-- END: Splash Screen CSS -->
-
 </head>
+
 <body>
 
-<!-- START: Splash Screen HTML -->
-<div class="loading">
-  <div class="loader"></div>
-</div>
-<!-- END: Splash Screen HTML -->
+<div class="loading-wrapper">
+  <div class="welcome-text">Welcome</div>
 
+  <div class="portfolio-details">
+    <div class="loading-container">
+      <div class="loading-text">My portfolio Umbrio</div>
+    </div>
+    <div class="loading-container subtitle-container">
+      <div class="loading-text subtitle">Crafting Digital Experiences</div>
+    </div>
+  </div>
+</div>
 <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>
