@@ -75,11 +75,8 @@ class _MobilescreenState extends State<Mobilescreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      // --- CHANGE: The entire body is now our new interactive widget ---
       body: InteractiveSpotlightBackground(
-        // Use a different, high-res image for the main page background
         imagePath: 'assets/images/bachira.png',
-        // The child is the content that sits ON TOP of the background
         child: SafeArea(
           child: Center(
             child: Padding(
@@ -120,9 +117,7 @@ class _MobilescreenState extends State<Mobilescreen> {
   }
 
   Widget _buildAnimatedHomeScreen() {
-    // --- CHANGE: This now also uses the reusable widget for the device screen ---
     return InteractiveSpotlightBackground(
-      // This is the background for INSIDE the iPad
       imagePath: 'assets/images/back.jpg',
       child: Center(
         child: Container(

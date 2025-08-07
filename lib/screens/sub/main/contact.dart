@@ -41,6 +41,10 @@ class ContactScreen extends StatelessWidget {
   static const double _mobileQuestionFontSize = 20.0;
   static const double _tabletQuestionFontSize = 25.0;
 
+  // text color
+  static const Color _tabletTextColor = AppColors.textPrimaryBlack;
+  static const Color _desktopTextColor = AppColors.slate;
+
   // Helper to launch URL
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
@@ -80,6 +84,11 @@ class ContactScreen extends StatelessWidget {
             ? (isTablet ? _tabletQuestionFontSize : _mobileQuestionFontSize)
             : (isTablet ? _tabletQuestionFontSize : _desktopQuestionFontSize);
 
+        // Determine text color based on screen size.
+        final Color textColor = isCompact
+            ? (isTablet ? _tabletTextColor : _desktopTextColor)
+            : (isTablet ? _tabletTextColor : _desktopTextColor);
+
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(vertical: verticalPadding),
           child: Center(
@@ -97,9 +106,9 @@ class ContactScreen extends StatelessWidget {
                 PText(
                   "Get In Touch",
                   style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     fontSize: headingFontSize,
-                    color: AppColors.lightestSlate,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -109,7 +118,7 @@ class ContactScreen extends StatelessWidget {
                     "I'm always excited to connect with new people and explore interesting opportunities. My inbox is open—whether for a potential project or just to say hi!",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
-                      color: AppColors.slate,
+                      color: textColor,
                       height: 1.5,
                       fontSize: questionFontSize,
                     ),
@@ -122,12 +131,16 @@ class ContactScreen extends StatelessWidget {
                   fontSize: questionFontSize,
                 ),
                 const SizedBox(height: 40),
-                _SocialLinks(onPressed: _launchUrl, size: isTablet ? 50 : 25),
+                _SocialLinks(
+                  onPressed: _launchUrl,
+                  size: isTablet ? 50 : 25,
+                  textColor: textColor,
+                ),
                 SizedBox(height: 20),
                 Text(
                   'Designed & Built with care by Balingene Dan',
                   style: GoogleFonts.poppins(
-                    color: AppColors.slate,
+                    color: textColor,
                     fontSize: questionFontSize,
                   ),
                 ),
@@ -171,7 +184,12 @@ class _ContactButton extends StatelessWidget {
 class _SocialLinks extends StatelessWidget {
   final Future<void> Function(String url) onPressed;
   final double size;
-  const _SocialLinks({required this.onPressed, required this.size});
+  final Color textColor;
+  const _SocialLinks({
+    required this.onPressed,
+    required this.size,
+    required this.textColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -180,16 +198,16 @@ class _SocialLinks extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () => onPressed('mailto:balingenensiidan@gmail.com'),
-          icon: Icon(CupertinoIcons.mail, color: AppColors.slate, size: size),
+          icon: Icon(CupertinoIcons.mail, color: textColor, size: size),
         ),
         IconButton(
           onPressed: () => onPressed('https://github.com/Umbra-shadow'),
-          icon: Icon(BoxIcons.bxl_github, color: AppColors.slate, size: size),
+          icon: Icon(BoxIcons.bxl_github, color: textColor, size: size),
         ),
         IconButton(
           onPressed: () =>
               onPressed('https://www.linkedin.com/in/dan-balingene-802100326'),
-          icon: Icon(BoxIcons.bxl_linkedin, color: AppColors.slate, size: size),
+          icon: Icon(BoxIcons.bxl_linkedin, color: textColor, size: size),
         ),
       ],
     );

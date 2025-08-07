@@ -27,7 +27,7 @@ class IconsDesign extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 side: const BorderSide(color: Colors.white54),
               ),
-              elevation: 8,
+              elevation: 18,
               clipBehavior: Clip.antiAlias,
               child: Image.asset(
                 'assets/images/$path',
@@ -42,7 +42,7 @@ class IconsDesign extends StatelessWidget {
             name,
             style: GoogleFonts.poppins(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
               color: Colors.white,
               shadows: [
                 const Shadow(

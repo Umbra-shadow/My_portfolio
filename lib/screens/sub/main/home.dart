@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:myportfolio/screens/main/mainscreen.dart';
+import 'package:myportfolio/model.dart';
 
 import '../../../pText.dart';
 import '../../../umbra_utils/design/color.dart';
@@ -50,20 +51,14 @@ class HomeContent extends StatelessWidget {
   static const double _textPaddingTablet = 50.0;
   static const double _textPaddingCompactTablet = 5.0;
 
+  // text color
+  static const Color _tabletTextColor = AppColors.textPrimaryBlack;
+  static const Color _desktopTextColor = AppColors.slate;
+
   //  intro text
   static const String _fullIntroText =
       "I'm a software engineer specializing in building exceptional digital experiences. My process often starts with paper sketches, and I’m currently focused on building accessible, human-centered products for mobile using Flutter, supported by robust Python & Django backends and Firebase.";
   // Skill list
-  static const List<String> _skills = [
-    'Git',
-    'Dart',
-    'Flutter',
-    'Firebase',
-    'REST APIs',
-    'Agile Methodologies',
-    'UI/UX Design Principles',
-    'State Management (Bloc, Provider)',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -109,14 +104,19 @@ class HomeContent extends StatelessWidget {
             ? (isTablet ? _fullIntroText : _fullIntroText)
             : (isTablet ? _fullIntroText : _fullIntroText);
 
+        // Determine text color based on screen size.
+        final Color textColor = isCompact
+            ? (isTablet ? _tabletTextColor : _desktopTextColor)
+            : (isTablet ? _tabletTextColor : _desktopTextColor);
+
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             vertical: isCompact
                 ? (isTablet ? _textPaddingCompactTablet : _textPadding)
-                : (isTablet ? _textPaddingTablet : 25.0),
+                : (isTablet ? _textPaddingTablet : 10.0),
             horizontal: isCompact
                 ? (isTablet ? _textPaddingCompactTablet : _textPadding)
-                : (isTablet ? _textPaddingTablet : 25.0),
+                : (isTablet ? _textPaddingTablet : 10.0),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,25 +132,25 @@ class HomeContent extends StatelessWidget {
               PText(
                 "Balingene Dan.",
                 style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   fontSize: headingFontSize,
-                  color: AppColors.lightestSlate,
+                  color: textColor,
                 ),
               ),
               const SizedBox(height: 05),
               PText(
                 "I build things for mobile.",
                 style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   fontSize: subHeadingFontSize,
-                  color: AppColors.slate,
+                  color: textColor.withOpacity(0.5),
                 ),
               ),
               const SizedBox(height: 05),
               PText(
                 introText,
                 style: GoogleFonts.poppins(
-                  color: AppColors.slate,
+                  color: textColor,
                   height: 1.5,
                   fontSize: introTextFontSize,
                 ),
@@ -163,42 +163,44 @@ class HomeContent extends StatelessWidget {
                   fontSize: greetingFontSize,
                 ),
               ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 12.0, // Horizontal space between chips
-                runSpacing: 12.0, // Vertical space between lines of chips
-                children: _skills
-                    .map(
-                      (skill) => _SkillChip(
-                        text: skill,
-                        fontsize: skillTextFontSize,
-                        color1: isCompact
-                            ? AppColors.textSecondaryBlack.withOpacity(0.3)
-                            : AppColors.portfolioPurple.withOpacity(0.1),
-                        color2: isCompact
-                            ? AppColors.portfolioPurple
-                            : AppColors.portfolioPurple,
+              const SizedBox(height: 05),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: categories.map(
+                  (category) {
+                    return Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            category,
+                            style: GoogleFonts.poppins(
+                              color: AppColors.portfolioPurple,
+                              fontSize: greetingFontSize,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: getSkillsByCategory(category)
+                                .map(
+                                  (skill) => SkillPointer(
+                                    textColor: textColor,
+                                    text: skill.skill,
+                                    fontSize: skillTextFontSize,
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ],
                       ),
-                    )
-                    .toList(),
+                    );
+                  },
+                ).toList(), // Don't forget .toList() to create the list of widgets
               ),
               const SizedBox(height: 15),
-              _CtaButton(
-                text: 'Check Out My Work!',
-                ctaBackground: isTablet ? Colors.white : Colors.transparent,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MainScreen(index: 3),
-                    ),
-                  );
-                },
-                fontsize: isCompact
-                    ? (isTablet ? 14 : 12)
-                    : (isTablet ? 14 : 14),
-              ),
-              SizedBox(height: 20),
               isTablet
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -217,7 +219,7 @@ class HomeContent extends StatelessWidget {
                                   text: 'Yes',
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                    Navigator.push(
+                                    Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
@@ -278,7 +280,7 @@ class HomeContent extends StatelessWidget {
             title,
             style: GoogleFonts.poppins(
               color: AppColors.textPrimaryBlack,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
           ),
           content: SizedBox(
@@ -338,32 +340,78 @@ class _CtaButton extends StatelessWidget {
   }
 }
 
-class _SkillChip extends StatelessWidget {
-  final double fontsize;
-  final String text;
-  final Color color1;
-  final Color color2;
+// class _SkillChip extends StatelessWidget {
+//   final double fontsize;
+//   final String text;
+//   final Color color1;
+//   final Color color2;
+//
+//   const _SkillChip({
+//     required this.text,
+//     required this.fontsize,
+//     required this.color1,
+//     required this.color2,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+//       decoration: BoxDecoration(
+//         color: color1,
+//         borderRadius: BorderRadius.circular(20),
+//         border: Border.all(color: AppColors.portfolioPurple, width: 1.0),
+//       ),
+//       child: PText(
+//         text,
+//         style: GoogleFonts.poppins(fontSize: fontsize, color: color2),
+//       ),
+//     );
+//   }
+// }
 
-  const _SkillChip({
+class SkillPointer extends StatelessWidget {
+  final String text;
+  final double fontSize;
+  final Color textColor;
+
+  const SkillPointer({
+    super.key,
     required this.text,
-    required this.fontsize,
-    required this.color1,
-    required this.color2,
+    required this.fontSize,
+    required this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: color1,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.portfolioPurple, width: 1.0),
-      ),
-      child: PText(
-        text,
-        style: GoogleFonts.poppins(fontSize: fontsize, color: color2),
-      ),
+    final skill = getSkillDetails(text);
+
+    return Row(
+      children: [
+        const Icon(Icons.arrow_right, color: AppColors.portfolioPurple),
+        skill.imageUrl != null
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: SvgPicture.network(
+                  skill.imageUrl ?? '',
+                  width: 20,
+                  height: 20,
+                  fit: BoxFit.cover,
+                ),
+              )
+            : const SizedBox(width: 0),
+        const SizedBox(width: 05),
+        Flexible(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(color: textColor, fontSize: fontSize),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     );
   }
 }

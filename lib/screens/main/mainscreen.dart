@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../pText.dart';
-// Assuming these are the paths to your screen widgets and other files
 import '../../umbra_utils/design/color.dart';
 import '../sub/main/about.dart';
 import '../sub/main/contact.dart';
@@ -95,18 +94,25 @@ class _MainScreenState extends State<MainScreen> {
 
   AppBar _buildAppBar(bool isCompact) {
     return AppBar(
-      title: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.portfolioPurple, width: 2),
-        ),
-        child: Text(
-          'D',
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            color: AppColors.portfolioPurple,
-            fontWeight: FontWeight.bold,
+      title: GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedIndex = 0;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.portfolioPurple, width: 2),
+          ),
+          child: Text(
+            'D',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              color: AppColors.portfolioPurple,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),
@@ -136,7 +142,7 @@ class _MainScreenState extends State<MainScreen> {
           side: const BorderSide(color: AppColors.portfolioPurple, width: 1),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
-        child: Text('Resume', style: GoogleFonts.poppins()),
+        child: Text('Resume', style: GoogleFonts.poppins(fontSize: 13)),
       ),
     ];
   }
@@ -213,9 +219,9 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Container(
-              height: 700,
+              height: 800,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               child: SingleChildScrollView(
                 child: mainContentWidgets[selectedIndex][1],

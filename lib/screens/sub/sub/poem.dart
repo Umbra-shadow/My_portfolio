@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:myportfolio/poem_text.dart';
 import 'package:myportfolio/umbra_utils/design/color.dart';
-import 'package:myportfolio/umbra_utils/design/poem_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PoemScreen extends StatefulWidget {
@@ -86,10 +86,10 @@ class _PoemScreenState extends State<PoemScreen> {
                     currentPoem.poem,
                     key: ValueKey<String>(currentPoem.title),
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.breeSerif(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondaryBlack,
+                    style: GoogleFonts.poppins(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.backgroundBlack,
                       height: 1.8,
                     ),
                   ),

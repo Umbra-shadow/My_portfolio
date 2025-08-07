@@ -70,14 +70,14 @@ class NavBarButton extends StatelessWidget {
           foregroundColor: isSelected
               ? Colors.white
               : AppColors.textSecondaryWhite,
-          shape: RoundedRectangleBorder(),
+          shape: const RoundedRectangleBorder(),
           padding: const EdgeInsets.all(30),
         ),
         child: Text(
           text,
           style: GoogleFonts.poppins(
             fontSize: isSelected ? 25 : 18,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            fontWeight: isSelected ? FontWeight.w500 : FontWeight.w600,
           ),
           textAlign: TextAlign.center,
           maxLines: 1,

@@ -24,7 +24,7 @@ So keep on throwing acid on me... even by ignoring my state, the need of a door 
   ),
 
   AppPoems(
-    title: 'TAlways blamed for📓🗝️',
+    title: 'Always blamed for📓🗝️',
     poem:
         '''Just like this black water of the unknown river, I’m always blamed and accused .
 They say that water is beautiful, that water is tempting, and look yummy and end up doing reckless things.

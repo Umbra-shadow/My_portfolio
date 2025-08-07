@@ -24,7 +24,7 @@ class WorkContent extends StatelessWidget {
   static const double _mobileTitleFontSize = 16.0;
 
   // description font sizes
-  static const double _desktopDescriptionFontSize = 12.0;
+  static const double _desktopDescriptionFontSize = 10.0;
   static const double _tabletDescriptionFontSize = 16.0;
   static const double _mobileDescriptionFontSize = 14.0;
 
@@ -49,7 +49,10 @@ class WorkContent extends StatelessWidget {
   // vertical padding
   static const double _desktopVerticalPadding = 0.0;
   static const double _mobileVerticalPadding = 100.0;
-  static const double _tabletVerticalPadding = 100.0;
+  static const double _tabletVerticalPadding = 50.0;
+  // text color
+  static const Color _tabletTextColor = AppColors.textPrimaryBlack;
+  static const Color _desktopTextColor = AppColors.slate;
 
   static const List<Map<String, dynamic>> _projects = [
     {
@@ -92,7 +95,7 @@ class WorkContent extends StatelessWidget {
     {
       'title': 'Govonic',
       'desc':
-          'A government-centered emergency system for handling incidents within secured premises.',
+          'A secure digital infrastructure designed to streamline identity verification and official documentation access in governmental interactions. Built for adaptability and discretion, it enhances how individuals and institutions manage and present critical records within regulated environments.',
       'tags': ['Django', 'Flutter', 'PostgreSQL'],
       'isAvailable': false,
       'iosLink': '',
@@ -146,10 +149,15 @@ class WorkContent extends StatelessWidget {
             ? (isTablet ? _tabletCompactIntroFontSize : _mobileIntroFontSize)
             : (isTablet ? _tabletIntroFontSize : _desktopIntroFontSize);
 
+        // Determine text color based on screen size.
+        final Color textColor = isCompact
+            ? (isTablet ? _tabletTextColor : _desktopTextColor)
+            : (isTablet ? _tabletTextColor : _desktopTextColor);
+
         // card ratio
         final double ratio = isCompact
             ? (isTablet ? 1 : 0.99)
-            : (isTablet ? 0.8 : 1);
+            : (isTablet ? 0.8 : 1.25);
 
         // padding
         final double verticalPadding = isCompact
@@ -159,9 +167,6 @@ class WorkContent extends StatelessWidget {
             : (isTablet ? _tabletVerticalPadding : _desktopVerticalPadding);
 
         // colors
-        final Color textColor = isTablet
-            ? AppColors.textSecondaryBlack
-            : AppColors.textSecondaryBlack;
         final Color titleColor = isTablet
             ? AppColors.textPrimaryBlack
             : AppColors.textPrimaryBlack;
@@ -169,51 +174,53 @@ class WorkContent extends StatelessWidget {
             ? Colors.white
             : AppColors.lightestSlate;
 
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: verticalPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "04. Some Things I've Built",
-                style: GoogleFonts.poppins(
-                  fontSize: headingFontSize,
-                  color: AppColors.portfolioPurple,
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: verticalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "04. Some Things I've Built",
+                  style: GoogleFonts.poppins(
+                    fontSize: headingFontSize,
+                    color: AppColors.portfolioPurple,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "A few systems I've either built or still building.",
-                style: GoogleFonts.poppins(
-                  fontSize: introFontSize,
-                  color: AppColors.slate,
+                const SizedBox(height: 8),
+                Text(
+                  "Here are a few projects I've worked on or am still actively building. Some are already available, while others are still in development — often involving complex systems, large datasets, or responsibilities that take time to shape fully.",
+                  style: GoogleFonts.poppins(
+                    fontSize: introFontSize,
+                    color: textColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: isCompact ? 2 : 3,
-                  childAspectRatio: ratio,
-                  crossAxisSpacing: _cardSpacing,
-                  mainAxisSpacing: _cardSpacing,
+                const SizedBox(height: 10),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: isCompact ? 2 : 3,
+                    childAspectRatio: ratio,
+                    crossAxisSpacing: _cardSpacing,
+                    mainAxisSpacing: _cardSpacing,
+                  ),
+                  itemCount: _projects.length,
+                  itemBuilder: (context, index) {
+                    return _ProjectCard(
+                      project: _projects[index],
+                      titleFont: titleFontSize,
+                      descFont: descriptionFontSize,
+                      tagFont: tagsFontSize,
+                      textColor: textColor,
+                      titleColor: titleColor,
+                      cardColor: cardColor,
+                      maxlines: isCompact ? 1 : 3,
+                    );
+                  },
                 ),
-                itemCount: _projects.length,
-                itemBuilder: (context, index) {
-                  return _ProjectCard(
-                    project: _projects[index],
-                    titleFont: titleFontSize,
-                    descFont: descriptionFontSize,
-                    tagFont: tagsFontSize,
-                    textColor: textColor,
-                    titleColor: titleColor,
-                    cardColor: cardColor,
-                    maxlines: isCompact ? 1 : 3,
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -335,7 +342,7 @@ class _ProjectCardState extends State<_ProjectCard> {
                     widget.project['title'],
                     style: GoogleFonts.poppins(
                       fontSize: widget.titleFont,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                       color: widget.titleColor,
                     ),
                     maxLines: 1,
@@ -355,7 +362,7 @@ class _ProjectCardState extends State<_ProjectCard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 10), // Add some spacing
+                  const Spacer(),
                   // --- Bottom: Tags ---
                   Wrap(
                     spacing: 08.0,
